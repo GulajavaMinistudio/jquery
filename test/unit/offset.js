@@ -31,11 +31,18 @@ var supportsFixedPosition, supportsScroll, alwaysScrollable,
 			null,
 			"offset/boxes.html",
 			function( assert, $, win, doc ) {
+				var scrollTop = win.pageYOffset,
+					scrollLeft = win.pageXOffset;
 				doc.documentElement.style.position = "fixed";
+				win.scrollTo( scrollLeft, scrollTop );
 				alwaysScrollable = win.pageXOffset !== 0;
 				done();
 			},
-			function( _, mockTest ) { mockTest( assert ); }
+			function mockQUnit_test( _, testCallback ) {
+				setTimeout( function() {
+					testCallback( assert );
+				} );
+			}
 		);
 	};
 
@@ -547,10 +554,9 @@ QUnit.test( "chaining", function( assert ) {
 			return props( position === "static" ? 0 : 8192, position === "static" ? 0 : 4096,
 				512, 256,  1024, 512,  2048, 1024,  position,
 				position !== "fixed" && "documentElement" );
-		},
-		viewportScroll = { top: 2, left: 1 };
+		};
 
-	function getExpectations( htmlPos, bodyPos ) {
+	function getExpectations( htmlPos, bodyPos, scrollTop, scrollLeft ) {
 
 		// Initialize data about page elements
 		var expectations = {
@@ -623,8 +629,8 @@ QUnit.test( "chaining", function( assert ) {
 			if ( props.style === "fixed" &&
 				( alwaysScrollable || expectations.documentElement.style !== "fixed" ) ) {
 
-				offset.top += viewportScroll.top;
-				offset.left += viewportScroll.left;
+				offset.top += scrollTop;
+				offset.left += scrollLeft;
 			}
 		} );
 
@@ -632,13 +638,13 @@ QUnit.test( "chaining", function( assert ) {
 		// Fudge the tests to work around <html>.gBCR() erroneously including margins
 		if ( /MSIE (?:9|10)\./.test( navigator.userAgent ) ) {
 			expectations.documentElement.pos.top -= expectations.documentElement.marginTop -
-				viewportScroll.top;
+				scrollTop;
 			expectations.documentElement.offset.top -= expectations.documentElement.marginTop -
-				viewportScroll.top;
+				scrollTop;
 			expectations.documentElement.pos.left -= expectations.documentElement.marginLeft -
-				viewportScroll.left;
+				scrollLeft;
 			expectations.documentElement.offset.left -= expectations.documentElement.marginLeft -
-				viewportScroll.left;
+				scrollLeft;
 			if ( htmlPos !== "static" ) {
 				delete expectations.documentElement;
 				delete expectations.body;
@@ -656,14 +662,17 @@ QUnit.test( "chaining", function( assert ) {
 			var label = "nonzero box properties - html." + htmlPos + " body." + bodyPos;
 			testIframe( label, "offset/boxes.html", function( assert, $, win, doc ) {
 
-				// Define expectations at runtime so alwaysScrollable is correct
-				var expectations = getExpectations( htmlPos, bodyPos );
+				// Define expectations at runtime to properly account for scrolling
+				var scrollTop = win.pageYOffset,
+					scrollLeft = win.pageXOffset,
+					expectations = getExpectations( htmlPos, bodyPos, scrollTop, scrollLeft );
 
 				assert.expect( 3 * Object.keys( expectations ).length );
 
-				// Setup documentElement and body styles
+				// Setup documentElement and body styles, preserving scroll position
 				doc.documentElement.style.position = htmlPos;
 				doc.body.style.position = bodyPos;
+				win.scrollTo( scrollLeft, scrollTop );
 
 				// Verify expected document offset
 				supportjQuery.each( expectations, function( id, descriptor ) {
