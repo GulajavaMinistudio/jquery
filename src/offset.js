@@ -7,12 +7,12 @@ define( [
 	"./css/curCSS",
 	"./css/addGetHookIf",
 	"./css/support",
-
+	"./var/isWindow",
 	"./core/init",
 	"./css",
 	"./selector" // contains
 ], function( jQuery, access, document, documentElement, rnumnonpx,
-             curCSS, addGetHookIf, support ) {
+             curCSS, addGetHookIf, support, isWindow ) {
 
 "use strict";
 
@@ -140,10 +140,8 @@ jQuery.fn.extend( {
 
 				// Incorporate borders into its offset, since they are outside its content origin
 				parentOffset = jQuery( offsetParent ).offset();
-				parentOffset = {
-					top: parentOffset.top + jQuery.css( offsetParent, "borderTopWidth", true ),
-					left: parentOffset.left + jQuery.css( offsetParent, "borderLeftWidth", true )
-				};
+				parentOffset.top += jQuery.css( offsetParent, "borderTopWidth", true );
+				parentOffset.left += jQuery.css( offsetParent, "borderLeftWidth", true );
 			}
 		}
 
@@ -186,7 +184,7 @@ jQuery.each( { scrollLeft: "pageXOffset", scrollTop: "pageYOffset" }, function( 
 
 			// Coalesce documents and windows
 			var win;
-			if ( jQuery.isWindow( elem ) ) {
+			if ( isWindow( elem ) ) {
 				win = elem;
 			} else if ( elem.nodeType === 9 ) {
 				win = elem.defaultView;
