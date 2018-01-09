@@ -190,10 +190,10 @@ QUnit.test( "globalEval execution after script injection (#7862)", function( ass
 
 	script.src = baseURL + "mock.php?action=wait&wait=2&script=1";
 
-	now = jQuery.now();
+	now = Date.now();
 	document.body.appendChild( script );
 
-	jQuery.globalEval( "var strictEvalTest = " + jQuery.now() + ";" );
+	jQuery.globalEval( "var strictEvalTest = " + Date.now() + ";" );
 	assert.ok( window.strictEvalTest - now < 500, "Code executed synchronously" );
 } );
 
@@ -1531,54 +1531,6 @@ QUnit.test( "jQuery.isEmptyObject", function( assert ) {
 	// equal(true, jQuery.isEmptyObject(null), "isEmptyObject on null" );
 } );
 
-QUnit.test( "jQuery.proxy", function( assert ) {
-	assert.expect( 9 );
-
-	var test2, test3, test4, fn, cb,
-		test = function() {
-			assert.equal( this, thisObject, "Make sure that scope is set properly." );
-		},
-		thisObject = { foo: "bar", method: test };
-
-	// Make sure normal works
-	test.call( thisObject );
-
-	// Basic scoping
-	jQuery.proxy( test, thisObject )();
-
-	// Another take on it
-	jQuery.proxy( thisObject, "method" )();
-
-	// Make sure it doesn't freak out
-	assert.equal( jQuery.proxy( null, thisObject ), undefined, "Make sure no function was returned." );
-
-	// Partial application
-	test2 = function( a ) {
-		assert.equal( a, "pre-applied", "Ensure arguments can be pre-applied." );
-	};
-	jQuery.proxy( test2, null, "pre-applied" )();
-
-	// Partial application w/ normal arguments
-	test3 = function( a, b ) {
-		assert.equal( b, "normal", "Ensure arguments can be pre-applied and passed as usual." );
-	};
-	jQuery.proxy( test3, null, "pre-applied" )( "normal" );
-
-	// Test old syntax
-	test4 = { "meth": function( a ) {
-		assert.equal( a, "boom", "Ensure old syntax works." );
-	} };
-	jQuery.proxy( test4, "meth" )( "boom" );
-
-	// jQuery 1.9 improved currying with `this` object
-	fn = function() {
-		assert.equal( Array.prototype.join.call( arguments, "," ), "arg1,arg2,arg3", "args passed" );
-		assert.equal( this.foo, "bar", "this-object passed" );
-	};
-	cb = jQuery.proxy( fn, null, "arg1", "arg2" );
-	cb.call( thisObject, "arg3" );
-} );
-
 QUnit.test( "jQuery.parseHTML", function( assert ) {
 	assert.expect( 23 );
 
@@ -1681,25 +1633,6 @@ QUnit.test( "jQuery.parseXML", function( assert ) {
 	} catch ( e ) {
 		assert.ok( false, "empty input throws exception" );
 	}
-} );
-
-QUnit.test( "jQuery.camelCase()", function( assert ) {
-
-	var tests = {
-		"foo-bar": "fooBar",
-		"foo-bar-baz": "fooBarBaz",
-		"girl-u-want": "girlUWant",
-		"the-4th-dimension": "the-4thDimension",
-		"-o-tannenbaum": "OTannenbaum",
-		"-moz-illa": "MozIlla",
-		"-ms-take": "msTake"
-	};
-
-	assert.expect( 7 );
-
-	jQuery.each( tests, function( key, val ) {
-		assert.equal( jQuery.camelCase( key ), val, "Converts: " + key + " => " + val );
-	} );
 } );
 
 testIframe(

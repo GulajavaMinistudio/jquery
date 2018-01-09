@@ -1,5 +1,6 @@
 define( [
 	"./core",
+	"./core/camelCase",
 	"./var/document",
 	"./var/rcssNum",
 	"./var/rnothtmlwhite",
@@ -17,8 +18,8 @@ define( [
 	"./manipulation",
 	"./css",
 	"./effects/Tween"
-], function( jQuery, document, rcssNum, rnothtmlwhite, cssExpand, isHiddenWithinTree, swap,
-	adjustCSS, dataPriv, showHide ) {
+], function( jQuery, camelCase, document, rcssNum, rnothtmlwhite, cssExpand, isHiddenWithinTree,
+	swap, adjustCSS, dataPriv, showHide ) {
 
 "use strict";
 
@@ -44,7 +45,7 @@ function createFxNow() {
 	window.setTimeout( function() {
 		fxNow = undefined;
 	} );
-	return ( fxNow = jQuery.now() );
+	return ( fxNow = Date.now() );
 }
 
 // Generate parameters to create a standard animation
@@ -259,7 +260,7 @@ function propFilter( props, specialEasing ) {
 
 	// camelCase, specialEasing and expand cssHook pass
 	for ( index in props ) {
-		name = jQuery.camelCase( index );
+		name = camelCase( index );
 		easing = specialEasing[ name ];
 		value = props[ index ];
 		if ( Array.isArray( value ) ) {
@@ -386,7 +387,7 @@ function Animation( elem, properties, options ) {
 		if ( result ) {
 			if ( jQuery.isFunction( result.stop ) ) {
 				jQuery._queueHooks( animation.elem, animation.opts.queue ).stop =
-					jQuery.proxy( result.stop, result );
+					result.stop.bind( result );
 			}
 			return result;
 		}
@@ -652,7 +653,7 @@ jQuery.fx.tick = function() {
 		i = 0,
 		timers = jQuery.timers;
 
-	fxNow = jQuery.now();
+	fxNow = Date.now();
 
 	for ( ; i < timers.length; i++ ) {
 		timer = timers[ i ];
