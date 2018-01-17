@@ -1415,7 +1415,7 @@ QUnit.test( "jQuery.clone() (#8017)", function( assert ) {
 
 	assert.expect( 2 );
 
-	assert.ok( jQuery.clone && jQuery.isFunction( jQuery.clone ), "jQuery.clone() utility exists and is a function." );
+	assert.ok( jQuery.clone && typeof jQuery.clone === "function", "jQuery.clone() utility exists and is a function." );
 
 	var main = jQuery( "#qunit-fixture" )[ 0 ],
 		clone = jQuery.clone( main );
@@ -1795,6 +1795,28 @@ QUnit.test( "html(String|Number)", function( assert ) {
 
 QUnit.test( "html(Function)", function( assert ) {
 	testHtml( manipulationFunctionReturningObj, assert  );
+} );
+
+QUnit[ QUnit.moduleTypeSupported ? "test" : "skip" ]( "html(script type module)", function( assert ) {
+	assert.expect( 4 );
+	var done = assert.async(),
+		$fixture = jQuery( "#qunit-fixture" );
+
+	$fixture.html(
+		[
+			"<script type='module'>ok( true, 'evaluated: module' );</script>",
+			"<script type='module' src='" + url( "module.js" ) + "'></script>",
+			"<div>",
+				"<script type='module'>ok( true, 'evaluated: inner module' );</script>",
+				"<script type='module' src='" + url( "inner_module.js" ) + "'></script>",
+			"</div>"
+		].join( "" )
+	);
+
+	// Allow asynchronous script execution to generate assertions
+	setTimeout( function() {
+		done();
+	}, 1000 );
 } );
 
 QUnit.test( "html(Function) with incoming value -- direct selection", function( assert ) {

@@ -76,25 +76,15 @@ QUnit.test( "show/hide", function( assert ) {
 }
 
 QUnit.test( "core", function( assert ) {
-	assert.expect( 25 );
+	assert.expect( 18 );
 
 	var elem = jQuery( "<div></div><span></span>" );
 
 	assert.strictEqual( elem.length, 2, "Correct number of elements" );
 	assert.strictEqual( jQuery.trim( "  hello   " ), "hello", "jQuery.trim" );
 
-	assert.strictEqual( jQuery.type( null ), "null", "jQuery.type(null)" );
-	assert.strictEqual( jQuery.type( undefined ), "undefined", "jQuery.type(undefined)" );
-	assert.strictEqual( jQuery.type( "a" ), "string", "jQuery.type(String)" );
-
 	assert.ok( jQuery.isPlainObject( { "a": 2 } ), "jQuery.isPlainObject(object)" );
 	assert.ok( !jQuery.isPlainObject( "foo" ), "jQuery.isPlainObject(String)" );
-
-	assert.ok( jQuery.isFunction( jQuery.noop ), "jQuery.isFunction(jQuery.noop)" );
-	assert.ok( !jQuery.isFunction( 2 ), "jQuery.isFunction(Number)" );
-
-	assert.ok( jQuery.isNumeric( "-2" ), "jQuery.isNumeric(String representing a number)" );
-	assert.ok( !jQuery.isNumeric( "" ), "jQuery.isNumeric(\"\")" );
 
 	assert.ok( jQuery.isXMLDoc( jQuery.parseXML(
 		"<?xml version='1.0' encoding='UTF-8'?><foo bar='baz'></foo>"

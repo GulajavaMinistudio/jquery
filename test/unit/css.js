@@ -262,13 +262,13 @@ QUnit.test( "css() non-px relative values (gh-1711)", function( assert ) {
 
 	getUnits( "lineHeight" );
 	cssCurrent = parseFloat( $child.css( "lineHeight", "1em" ).css( "lineHeight" ) );
+	add( "lineHeight",  50,  "%" );
 	add( "lineHeight",   2, "em" );
 	add( "lineHeight", -10, "px" );
 	add( "lineHeight",  20, "pt" );
 	add( "lineHeight",  30, "pc" );
 	add( "lineHeight",   1, "cm" );
 	add( "lineHeight", -44, "mm" );
-	add( "lineHeight",  50,  "%" );
 } );
 
 QUnit.test( "css() mismatched relative values with bounded styles (gh-2144)", function( assert ) {
@@ -1223,8 +1223,8 @@ QUnit.test( "certain css values of 'normal' should be convertable to a number, s
 
 	var el = jQuery( "<div style='letter-spacing:normal;font-weight:normal;'>test</div>" ).appendTo( "#qunit-fixture" );
 
-	assert.ok( jQuery.isNumeric( parseFloat( el.css( "letterSpacing" ) ) ), "css('letterSpacing') not convertable to number, see #8627" );
-	assert.ok( jQuery.isNumeric( parseFloat( el.css( "fontWeight" ) ) ), "css('fontWeight') not convertable to number, see #8627" );
+	assert.ok( !isNaN( parseFloat( el.css( "letterSpacing" ) ) ), "css('letterSpacing') not convertable to number, see #8627" );
+	assert.ok( !isNaN( parseFloat( el.css( "fontWeight" ) ) ), "css('fontWeight') not convertable to number, see #8627" );
 	assert.equal( typeof el.css( "fontWeight" ), "string", ".css() returns a string" );
 } );
 
