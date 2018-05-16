@@ -89,6 +89,27 @@ QUnit.module( "ajax", {
 		}
 	);
 
+	ajaxTest( "jQuery.ajax() - custom attributes for script tag", 4,
+		function( assert ) {
+			return {
+				create: function( options ) {
+					var xhr;
+					options.dataType = "script";
+					options.scriptAttrs = { id: "jquery-ajax-test", async: "async" };
+					xhr = jQuery.ajax( url( "mock.php?action=script" ), options );
+					assert.equal( jQuery( "#jquery-ajax-test" ).attr( "async" ), "async", "attr value" );
+					return xhr;
+				},
+				success: function() {
+					assert.ok( true, "success" );
+				},
+				complete: function() {
+					assert.ok( true, "complete" );
+				}
+			};
+		}
+	);
+
 	ajaxTest( "jQuery.ajax() - do not execute js (crossOrigin)", 2, function( assert ) {
 		return {
 			create: function( options ) {
