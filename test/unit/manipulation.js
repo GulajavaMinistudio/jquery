@@ -2835,3 +2835,26 @@ QUnit.test( "Ignore content from unsuccessful responses (gh-4126)", 1, function(
 		jQuery.globalEval = globalEval;
 	}
 } );
+
+testIframe(
+	"Check if CSP nonce is preserved",
+	"mock.php?action=cspNonce",
+	function( assert, jQuery, window, document ) {
+		var done = assert.async();
+
+		assert.expect( 1 );
+
+		supportjQuery.get( baseURL + "support/csp.log" ).done( function( data ) {
+			assert.equal( data, "", "No log request should be sent" );
+			supportjQuery.get( baseURL + "mock.php?action=cspClean" ).done( done );
+		} );
+	},
+
+	// Support: Edge 18+, iOS 7-9 only, Android 4.0-4.4 only
+	// Edge doesn't support nonce in non-inline scripts.
+	// See https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/13246371/
+	// Old iOS & Android Browser versions support script-src but not nonce, making this test
+	// impossible to run. Browsers not supporting CSP at all are not a problem as they'll skip
+	// script-src restrictions completely.
+	QUnit[ /\bedge\/|iphone os [789]|android 4\./i.test( navigator.userAgent ) ? "skip" : "test" ]
+);
