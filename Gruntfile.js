@@ -42,8 +42,8 @@ module.exports = function( grunt ) {
 			},
 			nodeSmokeTests: {
 				files: {
-					"test/node_smoke_tests/lib/ensure_iterability.js":
-						"test/node_smoke_tests/lib/ensure_iterability_es6.js"
+					"test/data/core/jquery-iterability-transpiled.js":
+						"test/data/core/jquery-iterability-transpiled-es6.js"
 				}
 			}
 		},
@@ -80,14 +80,9 @@ module.exports = function( grunt ) {
 
 					"npo/npo.js": "native-promise-only/npo.js",
 
-					"qunit/qunit.js": "qunitjs/qunit/qunit.js",
-					"qunit/qunit.css": "qunitjs/qunit/qunit.css",
-					"qunit/LICENSE.txt": "qunitjs/LICENSE.txt",
-
-					"qunit-assert-step/qunit-assert-step.js":
-					"qunit-assert-step/qunit-assert-step.js",
-					"qunit-assert-step/MIT-LICENSE.txt":
-					"qunit-assert-step/MIT-LICENSE.txt",
+					"qunit/qunit.js": "qunit/qunit/qunit.js",
+					"qunit/qunit.css": "qunit/qunit/qunit.css",
+					"qunit/LICENSE.txt": "qunit/LICENSE.txt",
 
 					"requirejs/require.js": "requirejs/require.js",
 
@@ -171,7 +166,6 @@ module.exports = function( grunt ) {
 				],
 				files: [
 					"test/data/jquery-1.9.1.js",
-					"external/qunit-assert-step/qunit-assert-step.js",
 					"external/sinon/sinon.js",
 					"external/npo/npo.js",
 					"external/requirejs/require.js",
