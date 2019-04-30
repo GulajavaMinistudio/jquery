@@ -641,7 +641,7 @@ QUnit.test( "show/hide detached nodes", function( assert ) {
 	span.remove();
 } );
 
-QUnit[ document.body.attachShadow ? "test" : "skip" ]( "show/hide shadow child nodes", function( assert ) {
+QUnit[ document.body.getRootNode ? "test" : "skip" ]( "show/hide shadow child nodes", function( assert ) {
 	assert.expect( 28 );
 	jQuery( "<div id='shadowHost'></div>" ).appendTo( "#qunit-fixture" );
 	var shadowHost = document.querySelector( "#shadowHost" );
@@ -1023,7 +1023,7 @@ QUnit[ jQuery.find.compile && jQuery.fn.toggle ? "test" : "skip" ]( "detached to
 		"cascade-hidden element in detached tree" );
 } );
 
-QUnit[ jQuery.find.compile && jQuery.fn.toggle && document.body.attachShadow ? "test" : "skip" ]( "shadow toggle()", function( assert ) {
+QUnit[ jQuery.find.compile && jQuery.fn.toggle && document.body.getRootNode ? "test" : "skip" ]( "shadow toggle()", function( assert ) {
 	assert.expect( 4 );
 	jQuery( "<div id='shadowHost'></div>" ).appendTo( "#qunit-fixture" );
 	var shadowHost = document.querySelector( "#shadowHost" );
@@ -1106,23 +1106,6 @@ QUnit.test( "box model properties incorrectly returning % instead of px, see #10
 
 	assert.equal( el.css( "marginRight" ), "200px", "css('marginRight') returning % instead of px, see #10639" );
 	assert.equal( el2.css( "marginLeft" ), "100px", "css('marginLeft') returning incorrect pixel value, see #12088" );
-} );
-
-QUnit.test( "jQuery.cssProps behavior, (bug #8402)", function( assert ) {
-	assert.expect( 2 );
-
-	var div = jQuery( "<div>" ).appendTo( document.body ).css( {
-		"position": "absolute",
-		"top": 0,
-		"left": 10
-	} );
-	jQuery.cssProps.top = "left";
-	assert.equal( div.css( "top" ), "10px", "the fixed property is used when accessing the computed style" );
-	div.css( "top", "100px" );
-	assert.equal( div[ 0 ].style.left, "100px", "the fixed property is used when setting the style" );
-
-	// cleanup jQuery.cssProps
-	jQuery.cssProps.top = undefined;
 } );
 
 QUnit.test( "widows & orphans #8936", function( assert ) {
@@ -1437,16 +1420,6 @@ QUnit.test( "certain css values of 'normal' should be convertable to a number, s
 	assert.equal( typeof el.css( "fontWeight" ), "string", ".css() returns a string" );
 } );
 
-// Support: IE 9 only
-// Only run this test in IE9
-if ( document.documentMode === 9 ) {
-	QUnit.test( ".css('filter') returns a string in IE9, see #12537", function( assert ) {
-		assert.expect( 1 );
-
-		assert.equal( jQuery( "<div style='-ms-filter:\"progid:DXImageTransform.Microsoft.gradient(startColorstr=#FFFFFF, endColorstr=#ECECEC)\";'></div>" ).css( "filter" ), "progid:DXImageTransform.Microsoft.gradient(startColorstr=#FFFFFF, endColorstr=#ECECEC)", "IE9 returns the correct value from css('filter')." );
-	} );
-}
-
 QUnit.test( "cssHooks - expand", function( assert ) {
 	assert.expect( 15 );
 	var result,
@@ -1506,9 +1479,9 @@ QUnit.test( "css opacity consistency across browsers (#12685)", function( assert
 } );
 
 QUnit[ jQuery.find.compile ? "test" : "skip" ]( ":visible/:hidden selectors", function( assert ) {
-	assert.expect( 17 );
+	assert.expect( 18 );
 
-	var $div, $table, $a;
+	var $div, $table, $a, $br;
 
 	assert.ok( jQuery( "#nothiddendiv" ).is( ":visible" ), "Modifying CSS display: Assert element is visible" );
 	jQuery( "#nothiddendiv" ).css( { display: "none" } );
@@ -1530,10 +1503,8 @@ QUnit[ jQuery.find.compile ? "test" : "skip" ]( ":visible/:hidden selectors", fu
 	$div.css( { width: 0, height: 0, overflow: "hidden" } );
 	assert.ok( $div.is( ":visible" ), "Div with width and height of 0 is still visible (gh-2227)" );
 
-	// Safari 6-7 and iOS 6-7 report 0 width for br elements
-	// When newer browsers propagate, re-enable this test
-	// $br = jQuery( "<br/>" ).appendTo( "#qunit-fixture" );
-	// assert.ok( $br.is( ":visible" ), "br element is visible" );
+	$br = jQuery( "<br/>" ).appendTo( "#qunit-fixture" );
+	assert.ok( $br.is( ":visible" ), "br element is visible" );
 
 	$table = jQuery( "#table" );
 	$table.html( "<tr><td style='display:none'>cell</td><td>cell</td></tr>" );
@@ -1556,11 +1527,7 @@ QUnit.test( "Keep the last style if the new one isn't recognized by the browser 
 	assert.equal( el.css( "position" ), "absolute", "The old style is kept when setting an unrecognized value" );
 } );
 
-// Support: Edge 14 - 16 only
-// Edge collapses whitespace-only values when setting a style property and
-// there is no easy way for us to work around it. Just skip the test there
-// and hope for the better future.
-QUnit[ /\bedge\/16\./i.test( navigator.userAgent ) ? "skip" : "test" ](
+QUnit.test(
 	"Keep the last style if the new one is a non-empty whitespace (gh-3204)",
 	function( assert ) {
 	assert.expect( 1 );
@@ -1665,25 +1632,14 @@ QUnit.test(
 	}
 );
 
-// Support: IE <=10 only
-// We have to jump through the hoops here in order to test work with "order" CSS property,
-// that some browsers do not support. This test is not, strictly speaking, correct,
-// but it's the best that we can do.
-( function() {
-	var style = document.createElement( "div" ).style,
-		exist = "order" in style || "WebkitOrder" in style;
+QUnit.test( "Don't append px to CSS \"order\" value (#14049)", function( assert ) {
+	assert.expect( 1 );
 
-	if ( exist ) {
-		QUnit.test( "Don't append px to CSS \"order\" value (#14049)", function( assert ) {
-			assert.expect( 1 );
+	var $elem = jQuery( "<div/>" );
 
-			var $elem = jQuery( "<div/>" );
-
-			$elem.css( "order", 2 );
-			assert.equal( $elem.css( "order" ), "2", "2 on order" );
-		} );
-	}
-} )();
+	$elem.css( "order", 2 );
+	assert.equal( $elem.css( "order" ), "2", "2 on order" );
+} );
 
 QUnit.test( "Do not throw on frame elements from css method (#15098)", function( assert ) {
 	assert.expect( 1 );
@@ -1712,13 +1668,6 @@ QUnit.test( "Do not throw on frame elements from css method (#15098)", function(
 
 ( function() {
 	var vendorPrefixes = [ "Webkit", "Moz", "ms" ];
-
-	function resetCssPropsFor( name ) {
-		delete jQuery.cssProps[ name ];
-		jQuery.each( vendorPrefixes, function( index, prefix ) {
-			delete jQuery.cssProps[ prefix + name[ 0 ].toUpperCase() + name.slice( 1 ) ];
-		} );
-	}
 
 	QUnit.test( "Don't default to a cached previously used wrong prefixed name (gh-2015)", function( assert ) {
 
@@ -1752,9 +1701,6 @@ QUnit.test( "Do not throw on frame elements from css method (#15098)", function(
 		}
 
 		assert.expect( !!appearanceName + !!transformName + 1 );
-
-		resetCssPropsFor( "appearance" );
-		resetCssPropsFor( "transform" );
 
 		elem = jQuery( "<div/>" )
 			.css( {
@@ -1815,18 +1761,12 @@ QUnit.test( "Do not throw on frame elements from css method (#15098)", function(
 		var div = jQuery( "<div>" ).appendTo( "#qunit-fixture" ),
 			$elem = jQuery( "<div>" ).addClass( "test__customProperties" )
 				.appendTo( "#qunit-fixture" ),
-			webkit = /\bsafari\b/i.test( navigator.userAgent ) &&
-				!/\firefox\b/i.test( navigator.userAgent ) &&
-				!/\edge\b/i.test( navigator.userAgent ),
-			oldSafari = webkit && ( /\b9\.\d(\.\d+)* safari/i.test( navigator.userAgent ) ||
-				/\b10\.0(\.\d+)* safari/i.test( navigator.userAgent ) ||
-				/iphone os (?:9|10)_/i.test( navigator.userAgent ) ),
+			webkitOrBlink = /\bsafari\b/i.test( navigator.userAgent ) &&
+				!/\bfirefox\b/i.test( navigator.userAgent ) &&
+				!/\bedge\b/i.test( navigator.userAgent ),
 			expected = 10;
 
-		if ( webkit ) {
-			expected -= 2;
-		}
-		if ( oldSafari ) {
+		if ( webkitOrBlink ) {
 			expected -= 2;
 		}
 		assert.expect( expected );
@@ -1852,17 +1792,13 @@ QUnit.test( "Do not throw on frame elements from css method (#15098)", function(
 
 		assert.equal( $elem.css( "--prop1" ), "val1", "Basic CSS custom property" );
 
-		// Support: Safari 9.1-10.0 only
-		// Safari collapses whitespaces & quotes. Ignore it.
-		if ( !oldSafari ) {
-			assert.equal( $elem.css( "--prop2" ), " val2", "Preceding whitespace maintained" );
-			assert.equal( $elem.css( "--prop3" ), "val3 ", "Following whitespace maintained" );
-		}
+		assert.equal( $elem.css( "--prop2" ), " val2", "Preceding whitespace maintained" );
+		assert.equal( $elem.css( "--prop3" ), "val3 ", "Following whitespace maintained" );
 
-		// Support: Chrome 49-55, Safari 9.1-10.0
+		// Support: Chrome <=49 - 73+, Safari <=9.1 - 12.1+
 		// Chrome treats single quotes as double ones.
 		// Safari treats double quotes as single ones.
-		if ( !webkit ) {
+		if ( !webkitOrBlink ) {
 			assert.equal( $elem.css( "--prop4" ), "\"val4\"", "Works with double quotes" );
 			assert.equal( $elem.css( "--prop5" ), "'val5'", "Works with single quotes" );
 		}
@@ -1884,4 +1820,19 @@ QUnit.test( "Do not throw on frame elements from css method (#15098)", function(
 	} );
 } )();
 
+}
+
+// Support: IE 11+
+if ( document.documentMode ) {
+	// Make sure explicitly provided IE vendor prefix (`-ms-`) is not converted
+	// to a non-working `Ms` prefix in JavaScript.
+	QUnit.test( "IE vendor prefixes are not mangled", function( assert ) {
+		assert.expect( 1 );
+
+		var div = jQuery( "<div>" ).appendTo( "#qunit-fixture" );
+
+		div.css( "-ms-grid-row", "1" );
+
+		assert.strictEqual( div.css( "-ms-grid-row" ), "1", "IE vendor prefixing" );
+	} );
 }

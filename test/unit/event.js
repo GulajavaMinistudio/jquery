@@ -1414,7 +1414,7 @@ QUnit.test( "Submit event can be stopped (#11049)", function( assert ) {
 	form.remove();
 } );
 
-// Support: iOS 7 - 9
+// Support: iOS <=7 - 12+
 // iOS has the window.onbeforeunload field but doesn't support the beforeunload
 // handler making it impossible to feature-detect the support.
 QUnit[ /(ipad|iphone|ipod)/i.test( navigator.userAgent ) ? "skip" : "test" ](
@@ -2434,7 +2434,7 @@ QUnit.test( "event object properties on natively-triggered event", function( ass
 		$link = jQuery( link ),
 		evt = document.createEvent( "MouseEvents" );
 
-	// Support: IE <=9 - 11 only
+	// Support: IE <=9 - 11+
 	// IE requires element to be in the body before it will dispatch
 	$link.appendTo( "body" ).on( "click", function( e ) {
 
@@ -2931,57 +2931,80 @@ QUnit.test( "trigger('click') on radio passes extra params", function( assert ) 
 	$radio.trigger( "click", [ true ] );
 } );
 
-// Support: IE <=9 only
-// https://msdn.microsoft.com/en-us/library/hh801223(v=vs.85).aspx
-QUnit.test( "VML with special event handlers (trac-7071)", function( assert ) {
-	assert.expect( 1 );
+QUnit.test( "focusout/focusin support", function( assert ) {
+	assert.expect( 6 );
 
-	var ns = jQuery( "<xml:namespace ns='urn:schemas-microsoft-com:vml' prefix='v' />" ).appendTo( "head" );
+	var focus,
+		parent = jQuery( "<div>" ),
+		input = jQuery( "<input>" ),
+		inputExternal = jQuery( "<input>" ),
 
-	jQuery( "<v:oval id='oval' style='width:100pt;height:75pt;' fillcolor='red'> </v:oval>" ).appendTo( "#form" );
-	jQuery( "#form" ).on( "keydown", function() {
-		assert.ok( true, "no error was thrown" );
-	} );
-	jQuery( "#oval" ).trigger( "click" ).trigger( "keydown" );
-	ns.remove();
-} );
+		// Support: IE <=9 - 11+
+		// focus and blur events are asynchronous; this is the resulting mess.
+		// The browser window must be topmost for this to work properly!!
+		done = assert.async();
 
-QUnit.test( "Check order of focusin/focusout events", function( assert ) {
-	assert.expect( 2 );
+	parent.append( input );
+	jQuery( "#qunit-fixture" ).append( parent ).append( inputExternal );
 
-	var focus, blur,
-		input = jQuery( "#name" );
+	// initially, lose focus
+	inputExternal[ 0 ].focus();
 
-	input
-		.on( "focus", function() {
-			focus = true;
-		} )
-		.on( "focusin", function() {
-			assert.ok( !focus, "Focusin event should fire before focus does" );
-			focus = true;
-		} )
-		.on( "blur", function() {
-			blur = true;
-		} )
-		.on( "focusout", function() {
-			assert.ok( !blur, "Focusout event should fire before blur does" );
-			blur = true;
-		} );
+	setTimeout( function() {
+		parent
+			.on( "focus", function() {
+				assert.ok( false, "parent: focus not fired" );
+			} )
+			.on( "focusin", function() {
+				assert.ok( true, "parent: focusin fired" );
+			} )
+			.on( "blur", function() {
+				assert.ok( false, "parent: blur not fired" );
+			} )
+			.on( "focusout", function() {
+				assert.ok( true, "parent: focusout fired" );
+			} );
 
-	// gain focus
-	input.trigger( "focus" );
+		input
+			.on( "focus", function() {
+				assert.ok( true, "element: focus fired" );
+			} )
+			.on( "focusin", function() {
+				assert.ok( true, "element: focusin fired" );
+				focus = true;
+			} )
+			.on( "blur", function() {
+				assert.ok( true, "parent: blur fired" );
+			} )
+			.on( "focusout", function() {
+				assert.ok( true, "element: focusout fired" );
+			} );
 
-	// then lose it
-	jQuery( "#search" ).trigger( "focus" );
+		// gain focus
+		input[ 0 ].focus();
 
-	// cleanup
-	input.off();
+		// then lose it
+		inputExternal[ 0 ].focus();
 
-	// DOM focus is unreliable in TestSwarm
-	if ( !focus ) {
-		assert.ok( true, "GAP: Could not observe focus change" );
-		assert.ok( true, "GAP: Could not observe focus change" );
-	}
+		setTimeout( function() {
+
+			// DOM focus is unreliable in TestSwarm
+			if ( QUnit.isSwarm && !focus ) {
+				assert.ok( true, "GAP: Could not observe focus change" );
+				assert.ok( true, "GAP: Could not observe focus change" );
+				assert.ok( true, "GAP: Could not observe focus change" );
+				assert.ok( true, "GAP: Could not observe focus change" );
+				assert.ok( true, "GAP: Could not observe focus change" );
+				assert.ok( true, "GAP: Could not observe focus change" );
+			}
+
+			// cleanup
+			parent.off();
+			input.off();
+
+			done();
+		}, 50 );
+	}, 50 );
 } );
 
 QUnit.test( "focus-blur order (#12868)", function( assert ) {
@@ -3022,7 +3045,7 @@ QUnit.test( "focus-blur order (#12868)", function( assert ) {
 		setTimeout( function() {
 
 			// DOM focus is unreliable in TestSwarm
-			if ( order === 0 ) {
+			if ( QUnit.isSwarm && order === 0 ) {
 				assert.ok( true, "GAP: Could not observe focus change" );
 				assert.ok( true, "GAP: Could not observe focus change" );
 			}
@@ -3039,6 +3062,49 @@ QUnit.test( "focus-blur order (#12868)", function( assert ) {
 			done();
 		}, 50 );
 	}, 50 );
+} );
+
+QUnit.test( "Event handling works with multiple async focus events (gh-4350)", function( assert ) {
+	assert.expect( 3 );
+
+	var remaining = 3,
+		input = jQuery( "#name" ),
+
+		// Support: IE <=9 - 11+
+		// focus and blur events are asynchronous; this is the resulting mess.
+		// The browser window must be topmost for this to work properly!!
+		done = assert.async();
+
+	input
+		.on( "focus", function() {
+			remaining--;
+			assert.ok( true, "received focus event, expecting " + remaining + " more" );
+			if ( remaining > 0 ) {
+				input.trigger( "blur" );
+			} else {
+				done();
+			}
+		} )
+		.on( "blur", function() {
+			setTimeout( function() {
+				input.trigger( "focus" );
+			} );
+		} );
+
+	// gain focus
+	input.trigger( "focus" );
+
+	// DOM focus is unreliable in TestSwarm
+	setTimeout( function() {
+		if ( QUnit.isSwarm && remaining === 3 ) {
+			assert.ok( true, "GAP: Could not observe focus change" );
+			assert.ok( true, "GAP: Could not observe focus change" );
+			assert.ok( true, "GAP: Could not observe focus change" );
+			setTimeout( function() {
+				done();
+			} );
+		}
+	} );
 } );
 
 QUnit.test( "native-backed events preserve trigger data (gh-1741, gh-4139)", function( assert ) {
