@@ -2,8 +2,8 @@ define( [
 	"./core",
 	"./core/isAttached",
 	"./var/concat",
+	"./var/isIE",
 	"./var/push",
-	"./var/rcheckableType",
 	"./core/access",
 	"./manipulation/var/rtagName",
 	"./manipulation/var/rscriptType",
@@ -11,7 +11,6 @@ define( [
 	"./manipulation/getAll",
 	"./manipulation/setGlobalEval",
 	"./manipulation/buildFragment",
-	"./manipulation/support",
 
 	"./data/var/dataPriv",
 	"./data/var/dataUser",
@@ -23,9 +22,8 @@ define( [
 	"./traversing",
 	"./selector",
 	"./event"
-], function( jQuery, isAttached, concat, push, rcheckableType,
-	access, rtagName, rscriptType,
-	wrapMap, getAll, setGlobalEval, buildFragment, support,
+], function( jQuery, isAttached, concat, isIE, push, access, rtagName,
+	rscriptType, wrapMap, getAll, setGlobalEval, buildFragment,
 	dataPriv, dataUser, acceptData, DOMEval, nodeName ) {
 
 "use strict";
@@ -222,7 +220,7 @@ jQuery.extend( {
 			inPage = isAttached( elem );
 
 		// Fix IE cloning issues
-		if ( !support.noCloneChecked && ( elem.nodeType === 1 || elem.nodeType === 11 ) &&
+		if ( isIE && ( elem.nodeType === 1 || elem.nodeType === 11 ) &&
 				!jQuery.isXMLDoc( elem ) ) {
 
 			// We eschew Sizzle here for performance reasons: https://jsperf.com/getall-vs-sizzle/2
@@ -233,7 +231,7 @@ jQuery.extend( {
 
 				// Support: IE <=11+
 				// IE fails to set the defaultValue to the correct value when
-				// cloning other types of input fields
+				// cloning textareas.
 				if ( destElements[ i ].nodeName.toLowerCase() === "textarea" ) {
 					destElements[ i ].defaultValue = srcElements[ i ].defaultValue;
 				}

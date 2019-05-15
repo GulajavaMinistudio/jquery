@@ -65,7 +65,7 @@ module.exports = function( grunt ) {
 		if ( /.\/var\//.test( path.replace( process.cwd(), "" ) ) ) {
 			contents = contents
 				.replace(
-					/define\([\w\W]*?return/,
+					/define\(\s*(["'])[\w\W]*?\1[\w\W]*?return/,
 					"var " +
 					( /var\/([\w-]+)/.exec( name )[ 1 ] ) +
 					" ="
@@ -372,7 +372,7 @@ module.exports = function( grunt ) {
 
 		// Ask for permission the first time
 		if ( insight.optOut === undefined ) {
-			insight.askPermission( null, function( error, result ) {
+			insight.askPermission( null, function( _error, result ) {
 				exec( result );
 			} );
 		} else {

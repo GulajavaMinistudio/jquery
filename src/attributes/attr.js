@@ -2,10 +2,10 @@ define( [
 	"../core",
 	"../core/access",
 	"../core/nodeName",
-	"./support",
 	"../var/rnothtmlwhite",
+	"../var/isIE",
 	"../selector"
-], function( jQuery, access, nodeName, support, rnothtmlwhite ) {
+], function( jQuery, access, nodeName, rnothtmlwhite, isIE ) {
 
 "use strict";
 
@@ -74,8 +74,10 @@ jQuery.extend( {
 	attrHooks: {
 		type: {
 			set: function( elem, value ) {
-				if ( !support.radioValue && value === "radio" &&
-					nodeName( elem, "input" ) ) {
+
+				// Support: IE <=11+
+				// An input loses its value after becoming a radio
+				if ( isIE && value === "radio" && nodeName( elem, "input" ) ) {
 					var val = elem.value;
 					elem.setAttribute( "type", value );
 					if ( val ) {
@@ -117,7 +119,7 @@ boolHook = {
 	}
 };
 
-jQuery.each( jQuery.expr.match.bool.source.match( /\w+/g ), function( i, name ) {
+jQuery.each( jQuery.expr.match.bool.source.match( /\w+/g ), function( _i, name ) {
 	var getter = attrHandle[ name ] || jQuery.find.attr;
 
 	attrHandle[ name ] = function( elem, name, isXML ) {
