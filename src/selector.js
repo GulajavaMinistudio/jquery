@@ -1,22 +1,18 @@
-define( [
-	"./core",
-	"./core/nodeName",
-	"./var/document",
-	"./var/documentElement",
-	"./var/indexOf",
-	"./var/pop",
-	"./var/push",
-	"./selector/rbuggyQSA",
-	"./selector/support",
+import jQuery from "./core.js";
+import nodeName from "./core/nodeName.js";
+import document from "./var/document.js";
+import documentElement from "./var/documentElement.js";
+import indexOf from "./var/indexOf.js";
+import pop from "./var/pop.js";
+import push from "./var/push.js";
+import whitespace from "./selector/var/whitespace.js";
+import rbuggyQSA from "./selector/rbuggyQSA.js";
+import support from "./selector/support.js";
 
-	// The following utils are attached directly to the jQuery object.
-	"./selector/contains",
-	"./selector/escapeSelector",
-	"./selector/uniqueSort"
-], function( jQuery, nodeName, document, documentElement, indexOf, pop, push,
-	rbuggyQSA, support ) {
-
-"use strict";
+// The following utils are attached directly to the jQuery object.
+import "./selector/contains.js";
+import "./selector/escapeSelector.js";
+import "./selector/uniqueSort.js";
 
 var preferredDoc = document,
 	matches = documentElement.matches || documentElement.msMatchesSelector;
@@ -45,9 +41,6 @@ var i,
 		"loop|multiple|open|readonly|required|scoped",
 
 	// Regular expressions
-
-	// https://www.w3.org/TR/css3-selectors/#whitespace
-	whitespace = "[\\x20\\t\\r\\n\\f]",
 
 	// https://www.w3.org/TR/css-syntax-3/#ident-token-diagram
 	identifier = "(?:\\\\[\\da-fA-F]{1,6}" + whitespace +
@@ -1642,5 +1635,3 @@ setDocument();
 jQuery.find = find;
 
 } )();
-
-} );
