@@ -2,8 +2,6 @@ QUnit.module( "selector", {
 	beforeEach: function() {
 		this.safari = /\bsafari\b/i.test( navigator.userAgent ) &&
 			!/\bchrome\b/i.test( navigator.userAgent );
-		this.chrome = /\bchrome\b/i.test( navigator.userAgent ) &&
-			!/\bedge\b/i.test( navigator.userAgent );
 	},
 	afterEach: moduleTeardown
 } );
@@ -1092,7 +1090,7 @@ QUnit.test( "pseudo - misc", function( assert ) {
 		assert.t( "Multi-pseudo", "#ap:has(*), #ap:has(*)", [ "ap" ] );
 		assert.t( "Multi-pseudo with leading nonexistent id", "#nonexistent:has(*), #ap:has(*)", [ "ap" ] );
 
-		assert.t( "Tokenization stressor", "a[class*=blog]:not(:has(*, :contains(!)), :contains(!)), br:contains(]), p:contains(]), :not(:empty):not(:parent)", [ "ap", "mark", "yahoo", "simon" ] );
+		assert.t( "Tokenization stressor", "a[class*=blog]:not(:has(*, :contains(!)), :contains(!)), br:contains(]), p:contains(]):not(.qunit-source), :not(:empty):not(:parent):not(.qunit-source)", [ "ap", "mark", "yahoo", "simon" ] );
 	} else {
 		assert.ok( "skip", ":has not supported in selector-native" );
 		assert.ok( "skip", ":has not supported in selector-native" );
@@ -1379,9 +1377,7 @@ QUnit.test( "pseudo - :(dis|en)abled, explicitly disabled", function( assert ) {
 			"disabled-select", "disabled-optgroup", "disabled-option" ]
 	);
 
-	if ( QUnit.jQuerySelectors || !this.chrome ) {
-		// Support: Chrome 75+
-		// Chrome recognizes anchor elements as enabled.
+	if ( QUnit.jQuerySelectors ) {
 		assert.t(
 			"Enabled elements",
 			"#enabled-fieldset :enabled",
