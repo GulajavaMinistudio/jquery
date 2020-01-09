@@ -41,7 +41,7 @@ module.exports = function( grunt ) {
 				retainLines: true,
 				plugins: [ "@babel/transform-for-of" ]
 			},
-			nodeSmokeTests: {
+			tests: {
 				files: {
 					"test/data/core/jquery-iterability-transpiled.js":
 						"test/data/core/jquery-iterability-transpiled-es6.js"
@@ -158,14 +158,31 @@ module.exports = function( grunt ) {
 
 					"test/jquery.js",
 
-					{ pattern: "dist/jquery.*", included: false, served: true },
-					{ pattern: "src/**", type: "module", included: false, served: true },
-					{ pattern: "amd/**", included: false, served: true },
+					{
+						pattern: "dist/jquery.*",
+						included: false,
+						served: true,
+						nocache: true
+					},
+					{
+						pattern: "src/**",
+						type: "module",
+						included: false,
+						served: true,
+						nocache: true
+					},
+					{
+						pattern: "amd/**",
+						included: false,
+						served: true,
+						nocache: true
+					},
 					{ pattern: "node_modules/**", included: false, served: true },
 					{
 						pattern: "test/**/*.@(js|css|jpg|html|xml|svg)",
 						included: false,
-						served: true
+						served: true,
+						nocache: true
 					}
 				],
 				reporters: [ "dots" ],
@@ -314,7 +331,13 @@ module.exports = function( grunt ) {
 		"karma:jsdom"
 	] );
 
+	grunt.registerTask( "test:prepare", [
+		"qunit_fixture",
+		"babel:tests"
+	] );
+
 	grunt.registerTask( "test", [
+		"test:prepare",
 		"test:fast",
 		"test:slow"
 	] );
@@ -336,7 +359,7 @@ module.exports = function( grunt ) {
 		"uglify",
 		"remove_map_comment",
 		"dist:*",
-		"qunit_fixture",
+		"test:prepare",
 		"eslint:dist",
 		"test:fast",
 		"compare_size"
