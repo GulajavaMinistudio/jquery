@@ -15,7 +15,8 @@ module.exports = function( grunt ) {
 	var fs = require( "fs" ),
 		gzip = require( "gzip-js" ),
 		isTravis = process.env.TRAVIS,
-		travisBrowsers = process.env.BROWSERS && process.env.BROWSERS.split( "," );
+		travisBrowsers = process.env.BROWSERS && process.env.BROWSERS.split( "," ),
+		CLIEngine = require( "eslint" ).CLIEngine;
 
 	if ( !grunt.option( "filename" ) ) {
 		grunt.option( "filename", "jquery.js" );
@@ -24,7 +25,7 @@ module.exports = function( grunt ) {
 	grunt.initConfig( {
 		pkg: grunt.file.readJSON( "package.json" ),
 		dst: readOptionalJSON( "dist/.destination.json" ),
-		"compare_size": {
+		compare_size: {
 			files: [ "dist/jquery.js", "dist/jquery.min.js" ],
 			options: {
 				compress: {
@@ -77,9 +78,7 @@ module.exports = function( grunt ) {
 		},
 		eslint: {
 			options: {
-
-				// See https://github.com/sindresorhus/grunt-eslint/issues/119
-				quiet: true
+				maxWarnings: 0
 			},
 
 			// We have to explicitly declare "src" property otherwise "newer"
@@ -88,7 +87,18 @@ module.exports = function( grunt ) {
 				src: [ "dist/jquery.js", "dist/jquery.min.js" ]
 			},
 			dev: {
-				src: [ "src/**/*.js", "Gruntfile.js", "test/**/*.js", "build/**/*.js" ]
+				src: [
+					"src/**/*.js",
+					"Gruntfile.js",
+					"test/**/*.js",
+					"build/**/*.js",
+
+					// Ignore files from .eslintignore
+					// See https://github.com/sindresorhus/grunt-eslint/issues/119
+					...new CLIEngine()
+						.getConfigForFile( "Gruntfile.js" )
+						.ignorePatterns.map( ( p ) => `!${ p }` )
+				]
 			}
 		},
 		testswarm: {
@@ -232,7 +242,7 @@ module.exports = function( grunt ) {
 						"test/data/jquery-1.9.1.js",
 						"test/data/testinit-jsdom.js",
 
-						// We don't support various loading methods like AMD,
+						// We don't support various loading methods like esmodules,
 						// choosing a version etc. for jsdom.
 						"dist/jquery.js",
 
@@ -291,7 +301,7 @@ module.exports = function( grunt ) {
 						"ascii_only": true
 					},
 					banner: "/*! jQuery v<%= pkg.version %> | " +
-						"(c) JS Foundation and other contributors | jquery.org/license */",
+						"(c) OpenJS Foundation and other contributors | jquery.org/license */",
 					compress: {
 						"hoist_funs": false,
 						loops: false

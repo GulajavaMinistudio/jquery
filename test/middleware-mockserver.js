@@ -81,6 +81,9 @@ var mocks = {
 		if ( req.query.header ) {
 			resp.writeHead( 200, { "content-type": "application/json" } );
 		}
+		if ( req.query.cors ) {
+			resp.writeHead( 200, { "access-control-allow-origin": "*" } );
+		}
 		if ( req.query.array ) {
 			resp.end( JSON.stringify(
 				[ { name: "John", age: 21 }, { name: "Peter", age: 25 } ]
@@ -93,7 +96,9 @@ var mocks = {
 	},
 	jsonp: function( req, resp, next ) {
 		var callback;
-		if ( req.query.callback ) {
+		if ( Array.isArray( req.query.callback ) ) {
+			callback = Promise.resolve( req.query.callback[ req.query.callback.length - 1 ] );
+		} else if ( req.query.callback ) {
 			callback = Promise.resolve( req.query.callback );
 		} else if ( req.method === "GET" ) {
 			callback = Promise.resolve( req.url.match( /^.+\/([^\/?.]+)\?.+$/ )[ 1 ] );
@@ -217,6 +222,15 @@ var mocks = {
 			__dirname + "/data/csp-nonce" + testParam + ".html" ).toString();
 		resp.end( body );
 	},
+	cspAjaxScript: function( req, resp ) {
+		resp.writeHead( 200, {
+			"Content-Type": "text/html",
+			"Content-Security-Policy": "script-src 'self'; report-uri /base/test/data/mock.php?action=cspLog"
+		} );
+		var body = fs.readFileSync(
+			__dirname + "/data/csp-ajax-script.html" ).toString();
+		resp.end( body );
+	},
 	cspLog: function( req, resp ) {
 		cspLog = "error";
 		resp.writeHead( 200 );
@@ -275,8 +289,7 @@ function MockserverMiddlewareFactory() {
 	 * @param {Function} next Continue request handling
 	 */
 	return function( req, resp, next ) {
-		var method = req.method,
-			parsed = url.parse( req.url, /* parseQuery */ true ),
+		var parsed = url.parse( req.url, /* parseQuery */ true ),
 			path = parsed.pathname.replace( /^\/base\//, "" ),
 			query = parsed.query,
 			subReq = Object.assign( Object.create( req ), {

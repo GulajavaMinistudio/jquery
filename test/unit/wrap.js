@@ -21,7 +21,7 @@ function manipulationFunctionReturningObj( value ) {
 
 function testWrap( val, assert ) {
 
-	assert.expect( 19 );
+	assert.expect( 18 );
 
 	var defaultText, result, j, i, cacheLength;
 
@@ -68,13 +68,7 @@ function testWrap( val, assert ) {
 		"Check node,textnode,comment wraps doesn't hurt text"
 	);
 
-	// Try wrapping a disconnected node
-	cacheLength = 0;
-	for ( i in jQuery.cache ) {
-		cacheLength++;
-	}
-
-	j = jQuery( "<label/>" ).wrap( val( "<li/>" ) );
+	j = jQuery( "<label></label>" ).wrap( val( "<li></li>" ) );
 	assert.equal(
 		j[ 0 ] .nodeName.toUpperCase(), "LABEL", "Element is a label"
 	);
@@ -82,15 +76,8 @@ function testWrap( val, assert ) {
 		j[ 0 ].parentNode.nodeName.toUpperCase(), "LI", "Element has been wrapped"
 	);
 
-	for ( i in jQuery.cache ) {
-		cacheLength--;
-	}
-	assert.equal(
-		cacheLength, 0, "No memory leak in jQuery.cache (bug #7165)"
-	);
-
 	// Wrap an element containing a text node
-	j = jQuery( "<span/>" ).wrap( "<div>test</div>" );
+	j = jQuery( "<span></span>" ).wrap( "<div>test</div>" );
 	assert.equal(
 		j[ 0 ].previousSibling.nodeType, 3, "Make sure the previous node is a text element"
 	);
@@ -112,7 +99,7 @@ function testWrap( val, assert ) {
 	);
 
 	// Wrap an element with a jQuery set
-	j = jQuery( "<span/>" ).wrap( jQuery( "<div></div>" ) );
+	j = jQuery( "<span></span>" ).wrap( jQuery( "<div></div>" ) );
 	assert.equal(
 		j[ 0 ].parentNode.nodeName.toLowerCase(), "div", "Wrapping works."
 	);
@@ -128,7 +115,7 @@ function testWrap( val, assert ) {
 		jQuery( this ).off();
 	} );
 
-	j = jQuery( "<span/>" ).wrap( result );
+	j = jQuery( "<span></span>" ).wrap( result );
 	assert.equal(
 		j[ 0 ].parentNode.nodeName.toLowerCase(), "div", "Wrapping works."
 	);
@@ -313,7 +300,7 @@ QUnit.test( "wrapInner(Element)", function( assert ) {
 	assert.expect( 5 );
 
 	var num,
-		div = jQuery( "<div/>" );
+		div = jQuery( "<div></div>" );
 
 	num = jQuery( "#first" ).children().length;
 	jQuery( "#first" ).wrapInner( document.getElementById( "empty" ) );
@@ -375,7 +362,7 @@ QUnit.test( "wrapInner(Function) returns Element", function( assert ) {
 
 	var num,
     val = manipulationFunctionReturningObj,
-		div = jQuery( "<div/>" );
+		div = jQuery( "<div></div>" );
 
 	num = jQuery( "#first" ).children().length;
 	jQuery( "#first" ).wrapInner( val( document.getElementById( "empty" ) ) );

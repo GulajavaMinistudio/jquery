@@ -3,6 +3,8 @@
 
 	"extends": "jquery",
 
+	"reportUnusedDisableDirectives": true,
+
 	"parserOptions": {
 		"ecmaVersion": 5
 	},
@@ -19,6 +21,7 @@
 	},
 
 	"rules": {
+		"one-var": ["error", {"var": "always"}],
 		"strict": ["error", "function"]
 	}
 }
